@@ -1,0 +1,44 @@
+* {
+    font-family: monospace;
+}
+
+input::file-selector-button {
+    font-family: monospace;
+}
+
+:root {
+    --bgclr: #E0E0E0;
+    --fgclr: #C0C0C0;
+}
+
+body {
+    padding: 2rem;
+    border: 0;
+    margin: 0;
+    background-color: var(--bgclr);
+}
+
+.main {
+    padding: 0;
+    border: 1rem solid var(--fgclr);
+    border-radius: 1rem;
+    margin: 0;
+    background-color: var(--fgclr);
+    display: inline-block;
+}
+
+table {
+    border: calc(1rem/16) solid #000;
+    border-collapse: collapse;
+}
+
+tr {
+    border: calc(1rem/16) solid #000;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 0.25rem;
+    border: calc(1rem/16) solid #000;
+    border-collapse: collapse;
+}
