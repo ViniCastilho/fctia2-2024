@@ -1,0 +1,48 @@
+for (let c = 0; c < count; c++) {
+        // ITERATION COUNT
+        for (let t = 0; t < training.length; t++) {
+            let first = (c === 0 && t === 0);
+            // TRAINING DATA
+            for (let h = 0; h < HIDDEN_NEURONS; h++) {
+                // INPUT TO HIDDEN
+                ai.netIn[h] = 0;
+                for (let i = 0; i < INPUT_NEURONS; i++) {
+                    ai.netIn[h] += training[t][i] * ai.weightIn[h][i];
+                }
+                // TRANSFER
+                //if (first) { console.log('netIn', h, ai.netIn[h], transfer(ai.netIn[h])); }
+                ai.netIn[h] = transfer(ai.netIn[h]);
+            }
+            for (let o = 0; o < OUTPUT_NEURONS; o++) {
+                // HIDDEN TO OUTPUT
+                ai.netOut[o] = 0;
+                for (let h = 0; h < HIDDEN_NEURONS; h++) {
+                    ai.netOut[o] += ai.netIn[h] * ai.weightOut[o][h];
+                }
+                // TRANSFER
+                ai.netOut[o] = transfer(ai.netOut[o]);
+            }
+            // BACK PROPAGATION
+            for (let o = 0; o < OUTPUT_NEURONS; o++) {
+                // OUT ERROR
+                let desiredOut = training[t][INPUT_NEURONS];
+                ai.errorOut[o] = (desiredOut - ai.netOut[o]) * transferError(ai.netOut[o]);
+                
+                for (let h = 0; h < HIDDEN_NEURONS; h++) {
+                    // IN ERROR
+                    // OUT WEIGHT CHANGE
+                    ai.errorIn[h] = ai.errorOut[o] * ai.weightOut[o][h] * transferError(ai.netIn[h]);
+                    ai.weightOut[o][h] += ai.learning * ai.errorOut[o] * (ai.netIn[h] * ai.weightOut[o][h]);
+                    for (let i = 0; i < INPUT_NEURONS; i++) {
+                        // IN WEIGHT CHANGE
+                        ai.weightIn[h][i] += ai.learning * ai.errorIn[h] * training[t][i];
+                    }
+                }
+            }
+            if (first) {
+                //console.log(ai.errorIn, ai.errorOut);
+                //console.log(transferError(ai.netOut[0]));
+                //console.log(ai.errorIn, ai.errorOut);
+            }
+        } // LOOP T
+    } // LOOP C

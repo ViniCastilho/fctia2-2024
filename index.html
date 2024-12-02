@@ -12,22 +12,22 @@
             <p><button id='train-load'>CARREGAR TREINAMENTO</button></p>
         </div></p>
         <p><div class='main'>
-            <p id='conf-status'>TREINAMENTO: NÃO CARREGADO</p>
+            <p id='conf-status'>(TREINAMENTO NÃO CARREGADO)</p>
             <p>NEURÔNIOS OCULTOS:&nbsp;<input id='conf-hidden' type='number' min='0' max='0' step='1' value='0'></p>
             <p>FUNÇÃO DE TRANSFERÊNCIA:&nbsp;<select id='conf-func'>
                 <option value='log'>LOGÍSTICA</option>
                 <option value='hyp'>HIPERBÓLICA</option>
             </select></p>
             <p>CONDIÇÃO DE PARADA:&nbsp;<select id='conf-stop'>
-                <option value='err'>ERRO MÁXIMO</option>
                 <option value='itr'>ITERAÇÃO</option>
+                <option value='err'>ERRO MÁXIMO (SEM OTIMIZAÇÃO)</option>
             </select></p>
-            <p>ERRO MÁXIMO:&nbsp;<input id='conf-itr' type='number' min='0.00' max='1.00' step='0.01' value='0.1'></p>
-            <p>TOTAL DE ITERAÇÕES:&nbsp;<input id='conf-itr' type='number' min='1' max='1000' step='1' value='50'></p>
+            <p>ERRO MÁXIMO:&nbsp;<input id='conf-err' type='number' min='0.00' max='1.00' step='0.01' value='0.1'></p>
+            <p>TOTAL DE ITERAÇÕES:&nbsp;<input id='conf-itr' type='number' min='1' max='50000' step='1' value='5000'></p>
             <p><button id='conf-begin'>INICIAR TREINAMENTO</button></p>
         </div></p>
         <p><div class='main'>
-            <p id='test-status'>REDE NEURAL: NÃO PRONTA</p>
+            <p id='test-status'>(REDE NEURAL NÃO PRONTA)</p>
             <p>ARQUIVO DE TESTE:&nbsp;<input id='test-file' type='file' accept='.csv'></p>
             <p><button id='test-begin'>INICIAR TESTE</button></p>
         </div></p>
