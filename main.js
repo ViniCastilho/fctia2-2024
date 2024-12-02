@@ -40,16 +40,18 @@ let CURR_TRANSFER_DERIVED = null;
 let trainingMethod = {};
 let transferCall = {
     'log': (x) => {
-        return 1/(1+Math.exp(-x));
+        return 1 / (1 + Math.exp(-x));
     },
     'dlog': (x) => {
-        return transferCall.log(x) * (1 - transferCall.log(x));
+        const fx = transferCall.log(x);
+        return fx * (1 - fx);
     },
     'hyp': (x) => {
-        return (Math.exp(x)-Math.exp(-x))/(Math.exp(x)+Math.exp(-x));
+        return (Math.exp(x) - Math.exp(-x)) / (Math.exp(x) + Math.exp(-x));
     },
     'dhyp': (x) => {
-        return 1-(transferCall.hyp(x)**2)
+        const fx = transferCall.hyp(x);
+        return 1 - (fx ** 2);
     },
 };
 
@@ -162,15 +164,72 @@ trainingMethod.itr = () => {
     CURR_TRANSFER = transferCall[name];
     CURR_TRANSFER_DERIVED = transferCall[`d${name}`];
     let count = parseInt(confItr.value);
+    let totalError = 0;
     for (let epoch = 0; epoch < count; epoch++) {
+        totalError = 0;
         for (let data of training) {
             let input = data.slice(0, INPUT_NEURONS);
             let expectedOutput = data[INPUT_NEURONS];
             let activations = forwardPropagation(input); 
             backPropagation(activations, expectedOutput);
             updateWeights(activations, LEARNING_RATE);
+            
+            let outputLayer = activations[LINK_COUNT];
+            for (let n = 0; n < OUTPUT_NEURONS; n++) {
+                let expected = (n + 1 === expectedOutput) ? 1 : 0;
+                totalError += 0.5 * Math.pow(outputLayer[n] - expected, 2);
+            }
         }
     }
+    return totalError;
+}
+
+function roundat(num, dec) {
+    dec = 10**(dec);
+    return Math.round((num + Number.EPSILON) * dec) / dec;
+}
+
+trainingMethod.err = () => {
+    let name = confFunc.options[confFunc.selectedIndex].value;
+    CURR_TRANSFER = transferCall[name];
+    CURR_TRANSFER_DERIVED = transferCall[`d${name}`];
+    let count = 100000;
+    let lastError = -1;
+    let totalError = 0;
+    let errorRepeat = 0;
+    const MAX_REPEAT = 500;
+    for (let epoch = 0; epoch < count; epoch++) {
+        totalError = 0;
+        for (let data of training) {
+            let input = data.slice(0, INPUT_NEURONS);
+            let expectedOutput = data[INPUT_NEURONS];
+            let activations = forwardPropagation(input); 
+            backPropagation(activations, expectedOutput);
+            updateWeights(activations, LEARNING_RATE);
+
+            let outputLayer = activations[LINK_COUNT];
+            for (let n = 0; n < OUTPUT_NEURONS; n++) {
+                let expected = (n + 1 === expectedOutput) ? 1 : 0;
+                totalError += 0.5 * Math.pow(outputLayer[n] - expected, 2);
+            }
+        }
+        totalError = roundat(totalError, 4);
+        if (epoch % 100 === 0) {
+            console.log(`Epoch ${epoch + 1}, Total Error: ${totalError}`);
+        }
+        if (totalError === lastError) {
+            errorRepeat++;
+        } else {
+            errorRepeat = 0;
+            lastError = totalError;
+        }
+        if (totalError < MAX_ERROR || errorRepeat > MAX_REPEAT) {
+            break;
+        } else if (totalError > 10000) {
+            return -1;
+        }
+    }
+    return totalError;
 }
 
 confBegin.onclick = () => {
@@ -201,11 +260,20 @@ confBegin.onclick = () => {
 
     // BEGIN TRAINING
     let opt = confStop.options[confStop.selectedIndex].value;
-    trainingMethod[opt]();
-    testStatus.innerHTML = '(REDE NEURAL PRONTA)';
+    let count = 0;
+    let run = trainingMethod[opt]();
+    while (-1 === run && count < 5) {
+        run = trainingMethod[opt]();
+        count++;
+    }
+    if (count === 5) {
+        testStatus.innerHTML = '(REDE NEURAL DIVERGIU)';
+    } else {
+        testStatus.innerHTML = `ERRO: ${run}`;
+    }
 }
 
-function testError(event) { alert('Um erro ocorreu ao ler o arquivo de treinamento.'); }
+function testError(event) { alert('Um erro ocorreu ao ler o arquivo de teste.'); }
 
 let testing = [];
 
@@ -226,11 +294,11 @@ function testNetwork(input, expectedOutput) {
     let outputLayer = activations[LINK_COUNT];
 
     let predictedClass = outputLayer.indexOf(Math.max(...outputLayer)) + 1;
-    console.log(input);
-    console.log(`EXPECTED ${expectedOutput}, GOT ${predictedClass}`);
-    console.log(outputLayer[predictedClass-1]);
-    console.log(outputLayer);
-    console.log('\n\n');
+    //console.log(input);
+    //console.log(`EXPECTED ${expectedOutput}, GOT ${predictedClass}`);
+    //console.log(outputLayer[predictedClass-1]);
+    //console.log(outputLayer);
+    //console.log('\n\n');
     return predictedClass;
 }
 
@@ -255,7 +323,6 @@ function testLoad(event) {
         }
     }
 
-    console.log(testing);
     let mat = [];
     endTable.innerHTML = '';
     for (let i = 0; i < OUTPUT_NEURONS; i++) {
